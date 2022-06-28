@@ -18,17 +18,25 @@ namespace NativeDialogs.Runtime
             string other = null)
         {
             int newId = m_Id++;
-            bool result = EditorUtility.DisplayDialog(title, message, confirm, cancel);
+            int result;
+            if (string.IsNullOrEmpty(other))
+            {
+                result = EditorUtility.DisplayDialog(title, message, confirm, cancel)?0:1;
+            }
+            else
+            {
+                result = EditorUtility.DisplayDialogComplex(title, message, confirm, cancel,other);
+            }
+
             ExecuteCallback(newId,result);
             return newId;
         }
 
-        private void ExecuteCallback(int id, bool result)
+        private void ExecuteCallback(int id, int result)
         {
             CoroutineManager.Instance.DelayFrame(() =>
             {
-                var dialogResult = result ? DialogResult.Confirm : DialogResult.Cancel;
-                m_DialogReceiver.OnClick(id, dialogResult);
+                m_DialogReceiver.OnClick(id,(DialogResult) result);
             });
         }
     }

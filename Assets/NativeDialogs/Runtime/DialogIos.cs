@@ -15,11 +15,11 @@ namespace NativeDialogs.Runtime
         public int ShowDialog(string title = null, string message = null, string cancel = null, string confirm = null,
             string other = null)
         {
-            return _ShowDialog(title,message,cancel,confirm,other);
+            return _ShowDialog(title,message,cancel,confirm,other,Callback);
         }
        
         [MonoPInvokeCallback(typeof(CallBack))]
-        private static void cs_callback(int id,int result)
+        private static void Callback(int id,int result)
         {
             DialogManager.Instance.OnClick(id,(DialogResult)result);
         }

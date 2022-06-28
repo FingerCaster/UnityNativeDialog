@@ -77,7 +77,7 @@ namespace NativeDialogs.Runtime
 #elif UNITY_ANDROID
             return new DialogAndroid();
 #elif UNITY_IOS
-            return new DialogIOS();
+            return new DialogIos();
 #else
             Debug.LogWarning($"{Application.platform} is not supported.");
             var mock = gameObject.AddComponent<DialogMock>();

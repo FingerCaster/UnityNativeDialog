@@ -6,9 +6,9 @@ namespace NativeDialogs.Runtime
 {
     public enum DialogResult
     {
-        Confirm,
-        Cancel,
-        Other,
+        Confirm = 0,
+        Cancel = 1,
+        Other = 2,
     }
 
     public class DialogManager : MonoBehaviour, IDialogReceiver

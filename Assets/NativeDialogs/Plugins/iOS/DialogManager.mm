@@ -8,8 +8,7 @@
 #import <Foundation/Foundation.h>
 
 #import "DialogManager.h"
-#import "UnityInterface.h"
-//
+
 @implementation DialogManager
 
 static DialogManager * shardDialogManager;
@@ -23,7 +22,7 @@ static DialogManager * shardDialogManager;
     return shardDialogManager;
 }
 
-- (int) _ShowDialog:(int)type title:(NSString*)title message:(NSString*)message cancel:(NSString*)cancel confirm:(NSString*)confirm other:(NSString*)other {
+- (int) GetId{
     int id = _id++;
     return id;
 }
@@ -33,10 +32,10 @@ static DialogManager * shardDialogManager;
 #if defined(__cplusplus)
 extern "C" {
 #endif
-  
-    extern void UnitySendMessage(const char *, const char *, const char *);
 
-    int _ShowDialog(char* title,char* info,char* cancel,char* confirm,char* other)
+    typedef void (*cs_callback)(int,int);
+
+    int _ShowDialog(char* title,char* info,char* cancel,char* confirm,char* other,cs_callback callback)
     {
         NSString* titleStr ;
         if (title!=NULL && title[0]!='\0') {
@@ -70,14 +69,13 @@ extern "C" {
         }
         UIAlertController* view = [UIAlertController alertControllerWithTitle:titleStr message:infoStr preferredStyle:UIAlertControllerStyleAlert];
        
-        int id = [[DialogManager sharedManager] _ShowDialog:type title:titleStr message:infoStr cancel:cancelStr confirm:cancelStr other:otherStr];
+        int id = [[DialogManager sharedManager] GetId];
         if (confirm!= NULL) {
             UIAlertAction* ok = [UIAlertAction actionWithTitle:confirmStr
             style:UIAlertActionStyleDefault
             handler:^(UIAlertAction* action)
             {
-                ;
-                UnitySendMessage("DialogManager","OnConfirmClick",[NSString stringWithFormat:@"%d", id].UTF8String);
+                callback(id,0);
                 [view dismissViewControllerAnimated: YES completion: nil];
             }];
             [view addAction:ok];
@@ -87,7 +85,7 @@ extern "C" {
             style:UIAlertActionStyleDefault
             handler:^(UIAlertAction* action)
             {
-                UnitySendMessage("DialogManager","OnCancelClick",[NSString stringWithFormat:@"%d", id].UTF8String);
+                callback(id,1);
                 [view dismissViewControllerAnimated: YES completion: nil];
             }];
             [view addAction:no];
@@ -97,7 +95,7 @@ extern "C" {
             style:UIAlertActionStyleDefault
             handler:^(UIAlertAction* action)
             {
-                UnitySendMessage("DialogManager","OnOtherClick",[NSString stringWithFormat:@"%d", id].UTF8String);
+                callback(id,2);
                 [view dismissViewControllerAnimated: YES completion: nil];
             }];
             [view addAction:otherAction];

@@ -27,9 +27,7 @@ namespace NativeDialogs.Runtime
         {
             CoroutineManager.Instance.DelayFrame(() =>
             {
-                DialogResult dialogResult;
-                dialogResult = result ? DialogResult.Confirm : DialogResult.Cancel;
-
+                var dialogResult = result ? DialogResult.Confirm : DialogResult.Cancel;
                 m_DialogReceiver.OnClick(id, dialogResult);
             });
         }

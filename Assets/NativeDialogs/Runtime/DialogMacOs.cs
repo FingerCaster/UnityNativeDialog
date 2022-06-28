@@ -46,13 +46,22 @@ namespace NativeDialogs.Runtime
         {
             CoroutineManager.Instance.DelayFrame(() =>
             {
-                DialogResult dialogResult = result switch
+                DialogResult dialogResult;
+                switch (result)
                 {
-                    MacDialogResult.Confirm => DialogResult.Confirm,
-                    MacDialogResult.Cancel => DialogResult.Cancel,
-                    MacDialogResult.Other => DialogResult.Other,
-                    _ => throw new ArgumentOutOfRangeException(nameof(result), result, null)
-                };
+                    case MacDialogResult.Confirm:
+                        dialogResult = DialogResult.Confirm;
+                        break;
+                    case MacDialogResult.Cancel:
+                        dialogResult = DialogResult.Cancel;
+                        break;
+                    case MacDialogResult.Other:
+                        dialogResult = DialogResult.Other;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(result), result, null);
+                }
+
                 m_DialogReceiver.OnClick(id,dialogResult);
             });
         }

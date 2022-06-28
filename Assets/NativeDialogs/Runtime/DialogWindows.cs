@@ -2,7 +2,6 @@
 using System;
 using System.Runtime.InteropServices;
 using AOT;
-using HookINCS;
 using UnityEngine;
 
 namespace NativeDialogs.Runtime
@@ -164,14 +163,25 @@ namespace NativeDialogs.Runtime
         {
             CoroutineManager.Instance.DelayFrame(() =>
             {
-                DialogResult dialogResult = result switch
+                DialogResult dialogResult;
+                switch (result)
                 {
-                    2 => DialogResult.Other,
-                    6 => DialogResult.Confirm,
-                    7 => DialogResult.Cancel,
-                    1 => DialogResult.Confirm,
-                    _ => throw new ArgumentOutOfRangeException(nameof(result), result, null)
-                };
+                    case 2:
+                        dialogResult = DialogResult.Other;
+                        break;
+                    case 6:
+                        dialogResult = DialogResult.Confirm;
+                        break;
+                    case 7:
+                        dialogResult = DialogResult.Cancel;
+                        break;
+                    case 1:
+                        dialogResult = DialogResult.Confirm;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(result), result, null);
+                }
+
                 m_DialogReceiver.OnClick(id, dialogResult);
             });
         }

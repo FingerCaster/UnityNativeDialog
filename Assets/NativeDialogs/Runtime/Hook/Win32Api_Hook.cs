@@ -1,9 +1,7 @@
 ﻿#if !UNITY_EDITOR && UNITY_STANDALONE_WIN
 using System;
 using System.Runtime.InteropServices;
-using NativeDialogs.Runtime;
-
-namespace HookINCS
+namespace NativeDialogs.Runtime
 {
     class Win32Api_Hook
     {

@@ -11,7 +11,7 @@ public class DialogManager {
     private static DialogManager _instance;
 
     private int _id;
-
+    private ICallback _callBack;
     /**
      * singleton class
      */
@@ -25,6 +25,9 @@ public class DialogManager {
         }
         return _instance;
     }
+    public void SetCallBack(ICallback callback) {
+        this._callBack = callback;
+    }
 
     public int ShowDialog(String title, String message, String cancel, String confirm, String other){
         ++_id;
@@ -36,19 +39,19 @@ public class DialogManager {
             public void run() {
                 DialogInterface.OnClickListener positiveListener = new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        UnityPlayer.UnitySendMessage("DialogManager", "OnConfirmClick", String.valueOf(id));
+                        _callBack.CallBack(id,0);
                     }
                 };
 
                 DialogInterface.OnClickListener negativeListener = new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        UnityPlayer.UnitySendMessage("DialogManager", "OnCancelClick", String.valueOf(id));
+                        _callBack.CallBack(id,1);
                     }
                 };
 
                 DialogInterface.OnClickListener neutralListener = new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        UnityPlayer.UnitySendMessage("DialogManager", "OnOtherClick", String.valueOf(id));
+                        _callBack.CallBack(id,2);
                     }
                 };
 
@@ -59,9 +62,9 @@ public class DialogManager {
                     dialog.setTitle("");
                 }
                 if (message!=null && !message.equals("")){
-                    dialog.setTitle(message);
+                    dialog.setMessage(message);
                 }else{
-                    dialog.setTitle("");
+                    dialog.setMessage("");
                 }
 
                 if (confirm!=null && !confirm.equals("")){
@@ -73,7 +76,7 @@ public class DialogManager {
                 if (other!=null && !other.equals("")){
                     dialog.setNeutralButton(other, neutralListener);
                 }
-
+                dialog.setCancelable(false);
                 dialog.show();
             }
         });

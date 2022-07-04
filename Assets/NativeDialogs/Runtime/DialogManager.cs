@@ -128,50 +128,7 @@ namespace NativeDialogs.Runtime
             int id = dialog.ShowDialog(title, message, cancel, confirm, other);
             m_Callbacks.Add(id, callback);
         }
-
-
-        public void OnConfirmClick(string args)
-        {
-            int id = int.Parse(args);
-            if (m_Callbacks.ContainsKey(id))
-            {
-                m_Callbacks[id](DialogResult.Confirm);
-                m_Callbacks.Remove(id);
-            }
-            else
-            {
-                Debug.LogWarning("Undefined id:" + args);
-            }
-        }
-
-        public void OnCancelClick(string args)
-        {
-            int id = int.Parse(args);
-            if (m_Callbacks.ContainsKey(id))
-            {
-                m_Callbacks[id](DialogResult.Cancel);
-                m_Callbacks.Remove(id);
-            }
-            else
-            {
-                Debug.LogWarning("Undefined id:" + args);
-            }
-        }
-
-        public void OnOtherClick(string args)
-        {
-            int id = int.Parse(args);
-            if (m_Callbacks.ContainsKey(id))
-            {
-                m_Callbacks[id](DialogResult.Other);
-                m_Callbacks.Remove(id);
-            }
-            else
-            {
-                Debug.LogWarning("Undefined id:" + args);
-            }
-        }
-
+        
         public void OnClick(int id, DialogResult dialogResult)
         {
             if (m_Callbacks.ContainsKey(id))

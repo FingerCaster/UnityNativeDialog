@@ -12,19 +12,28 @@ namespace NativeDialogs.Runtime
             {
             
             }
+            private IDialogReceiver m_DialogReceiver;
+
+            public void SetDialogReceiver(IDialogReceiver dialogReceiver)
+            {
+                m_DialogReceiver = dialogReceiver;
+            }
 
             public void CallBack(int id, int result)
             {
-                DialogManager.Instance.OnClick(id, (DialogResult)result);
+                m_DialogReceiver.OnClick(id, (DialogResult)result);
             }
         }
-        private readonly AndroidJavaObject m_AndroidJavaObject;
+        private AndroidJavaObject m_AndroidJavaObject;
         
-        public DialogAndroid()
+        public void Initialize(IDialogReceiver dialogReceiver, IDelayManager delayManager = null)
         {
             m_AndroidJavaObject = new AndroidJavaClass("unity.plugins.dialog.DialogManager").CallStatic<AndroidJavaObject>("getInstance");
-            m_AndroidJavaObject.Call("SetCallBack", new CallBackProxy());
+            var callBackProxy = new CallBackProxy();
+            callBackProxy.SetDialogReceiver(dialogReceiver);
+            m_AndroidJavaObject.Call("SetCallBack", callBackProxy);
         }
+        
 
         public int ShowDialog(string title = null, string message = null, string cancel = null, string confirm = null,
             string other = null)

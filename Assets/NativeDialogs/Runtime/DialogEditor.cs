@@ -8,11 +8,8 @@ namespace NativeDialogs.Runtime
     public class DialogEditor : IDialog
     {
         private IDialogReceiver m_DialogReceiver;
+        private IDelayManager m_DelayManager;
         private int m_Id = 0;
-        public void Initialize(IDialogReceiver receiver)
-        {
-            m_DialogReceiver = receiver;
-        }
 
         public int ShowDialog(string title = null, string message = null, string cancel = null, string confirm = null,
             string other = null)
@@ -32,9 +29,15 @@ namespace NativeDialogs.Runtime
             return newId;
         }
 
+        public void Initialize(IDialogReceiver dialogReceiver, IDelayManager delayManager = null)
+        {
+            m_DialogReceiver = dialogReceiver;
+            m_DelayManager = delayManager;
+        }
+
         private void ExecuteCallback(int id, int result)
         {
-            CoroutineManager.Instance.DelayFrame(() =>
+            m_DelayManager.DelayFrame(() =>
             {
                 m_DialogReceiver.OnClick(id,(DialogResult) result);
             });

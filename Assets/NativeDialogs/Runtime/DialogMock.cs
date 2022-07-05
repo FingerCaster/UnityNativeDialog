@@ -11,13 +11,8 @@ namespace NativeDialogs.Runtime
 
         private int m_ID = 0;
         private IDialogReceiver m_DialogReceiver;
+        private IDelayManager m_DelayManager;
 
-
-        public void Initialize(IDialogReceiver receiver,DialogResult result)
-        {
-            this.m_DialogReceiver = receiver;
-            this.mockResult = result;
-        }
         public int ShowDialog(string title = null, string message = null, string cancel = null, string confirm = null,
             string other = null)
         {
@@ -25,9 +20,16 @@ namespace NativeDialogs.Runtime
             ExecuteMockCallback(newID);
             return newID;
         }
+
+        public void Initialize(IDialogReceiver dialogReceiver, IDelayManager delayManager = null)
+        {
+            m_DialogReceiver = dialogReceiver;
+            m_DelayManager = delayManager;
+        }
+
         private void ExecuteMockCallback(int id)
         {
-            CoroutineManager.Instance.DelayFrame(() =>
+            m_DelayManager.DelayFrame(() =>
             {
                 m_DialogReceiver.OnClick(id, mockResult);
             });

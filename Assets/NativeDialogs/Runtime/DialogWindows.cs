@@ -87,10 +87,11 @@ namespace NativeDialogs.Runtime
         #endregion
         private int m_Id = 0;
         private IDialogReceiver m_DialogReceiver;
-
-        public void Initialize(IDialogReceiver receiver)
+        private IDelayManager m_DelayManager;
+        public void Initialize(IDialogReceiver dialogReceiver, IDelayManager delayManager = null)
         {
-            m_DialogReceiver = receiver;
+            m_DialogReceiver = dialogReceiver;
+            m_DelayManager = delayManager;
         }
 
         public int ShowDialog(string title = null, string message = null, string cancel = null, string confirm = null,
@@ -161,7 +162,7 @@ namespace NativeDialogs.Runtime
 
         private void ExecuteCallback(int id, int result)
         {
-            CoroutineManager.Instance.DelayFrame(() =>
+            m_DelayManager.DelayFrame(() =>
             {
                 DialogResult dialogResult;
                 switch (result)

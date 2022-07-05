@@ -11,135 +11,77 @@ namespace NativeDialogs.Runtime
         Other = 2,
     }
 
-    public class DialogManager : MonoBehaviour, IDialogReceiver
+    public class DialogManager :IDialogManager
     {
-        private static DialogManager m_Instance;
+        private IDialog m_Dialog;
+        private IDialogReceiver m_DialogReceiver;
+        private IDelayManager m_DelayManager;
 
-        public static DialogManager Instance
+        public void Initialize(IDialogReceiver dialogReceiver,IDelayManager delayManager)
         {
-            get
-            {
-                if (m_Instance == null)
-                {
-                    // Find if there is already DialogManager in the scene
-                    m_Instance = FindObjectOfType<DialogManager>();
-                    if (m_Instance == null)
-                    {
-                        m_Instance = new GameObject("DialogManager").AddComponent<DialogManager>();
-                    }
-
-                    DontDestroyOnLoad(m_Instance.gameObject);
-                }
-
-                return m_Instance;
-            }
+            m_DialogReceiver = dialogReceiver;
+            m_DelayManager = delayManager;
+            CreateDialog();
         }
 
-        private Dictionary<int, Action<DialogResult>> m_Callbacks;
-        private IDialog dialog;
-
-        public void Awake()
-        {
-            if (m_Instance == null)
-            {
-                // If I am the first instance, make me the Singleton
-                m_Instance = this;
-                DontDestroyOnLoad(this);
-
-                m_Callbacks = new Dictionary<int, Action<DialogResult>>();
-                dialog = CreateDialog();
-            }
-            else
-            {
-                // If s singleton already exists and you find
-                // another reference in scene, destroy it!
-                if (this != m_Instance)
-                {
-                    Destroy(gameObject);
-                }
-            }
-        }
-
-        private IDialog CreateDialog()
+        private void CreateDialog()
         {
 #if UNITY_EDITOR
-            DialogEditor dialogEditor = new DialogEditor();
-            dialogEditor.Initialize(this);
-            return dialogEditor;
+            m_Dialog = new DialogEditor();
 #elif UNITY_STANDALONE_OSX
-            DialogMacOs dialogMac = new DialogMacOs();
-            dialogMac.Initialize(this);
-            return dialogMac;
+            m_Dialog = new DialogMacOs();
 #elif UNITY_STANDALONE_WIN
-            DialogWindow dialogWindow = new DialogWindow();
-            dialogWindow.Initialize(this);
-            return dialogWindow;
+            m_Dialog = new DialogWindow();
 #elif UNITY_ANDROID
-            return new DialogAndroid();
+            m_Dialog = new DialogAndroid();
 #elif UNITY_IOS
-            return new DialogIos();
+            m_Dialog =  new DialogIos();
+            DialogIos.CallBackEvent = dialogReceiver.OnClick;
 #else
             Debug.LogWarning($"{Application.platform} is not supported.");
-            var mock = gameObject.AddComponent<DialogMock>();
-            mock.Initialize(this, DialogResult.Confirm);
-            return mock;
+            GameObject dialog = new GameObject("DialogMock");
+            m_Dialog = dialog.AddComponent<DialogMock>();
 #endif
+            m_Dialog.Initialize(m_DialogReceiver,m_DelayManager);
         }
 
         private string m_Confirm = "Confirm";
-        private string m_Cancel = "Cancel";
-        private string m_Other = "Other";
 
-        public void SetNormalLabel(string confirm, string cancel, string other)
+        public void SetNormalLabel(string confirm)
         {
             m_Confirm = confirm;
-            m_Cancel = cancel;
-            m_Other = other;
         }
 
         public void ShowDialog(string message, Action<DialogResult> callback)
         {
-            int id = dialog.ShowDialog(string.Empty, message, null, m_Confirm);
-            m_Callbacks.Add(id, callback);
+            int id = m_Dialog.ShowDialog(string.Empty, message, null, m_Confirm);
+            m_DialogReceiver.Register(id, callback);
         }
 
         public void ShowDialog(string title, string message, Action<DialogResult> callback)
         {
-            int id = dialog.ShowDialog(title, message, null, m_Confirm);
-            m_Callbacks.Add(id, callback);
+            int id = m_Dialog.ShowDialog(title, message, null, m_Confirm);
+            m_DialogReceiver.Register(id, callback);
         }
 
         public void ShowDialog(string title, string message, string confirm, Action<DialogResult> callback)
         {
-            int id = dialog.ShowDialog(title, message, null, confirm);
-            m_Callbacks.Add(id, callback);
+            int id = m_Dialog.ShowDialog(title, message, null, confirm);
+            m_DialogReceiver.Register(id, callback);
         }
 
         public void ShowDialog(string title, string message, string cancel, string confirm,
             Action<DialogResult> callback)
         {
-            int id = dialog.ShowDialog(title, message, cancel, confirm);
-            m_Callbacks.Add(id, callback);
+            int id = m_Dialog.ShowDialog(title, message, cancel, confirm);
+            m_DialogReceiver.Register(id, callback);
         }
 
         public void ShowDialog(string title, string message, string cancel, string confirm,
             string other, Action<DialogResult> callback)
         {
-            int id = dialog.ShowDialog(title, message, cancel, confirm, other);
-            m_Callbacks.Add(id, callback);
-        }
-        
-        public void OnClick(int id, DialogResult dialogResult)
-        {
-            if (m_Callbacks.ContainsKey(id))
-            {
-                m_Callbacks[id](dialogResult);
-                m_Callbacks.Remove(id);
-            }
-            else
-            {
-                Debug.LogWarning("Undefined id:" + id);
-            }
+            int id = m_Dialog.ShowDialog(title, message, cancel, confirm, other);
+            m_DialogReceiver.Register(id, callback);
         }
     }
 }

@@ -28,11 +28,7 @@ namespace NativeDialogs.Runtime
         
         private int m_Id = 0;
         private IDialogReceiver m_DialogReceiver;
-        
-        public void Initialize(IDialogReceiver receiver)
-        {
-            m_DialogReceiver = receiver;
-        }
+        private IDelayManager m_DelayManager;
         public int ShowDialog(string title = null, string message = null, string cancel = null, string confirm = null,
             string other = null)
         {
@@ -42,9 +38,15 @@ namespace NativeDialogs.Runtime
             return newId;
         }
 
+        public void Initialize(IDialogReceiver dialogReceiver, IDelayManager delayManager = null)
+        {
+            m_DialogReceiver = dialogReceiver;
+            m_DelayManager = delayManager;
+        }
+
         private void ExecuteCallback(int id, MacDialogResult result)
         {
-            CoroutineManager.Instance.DelayFrame(() =>
+            m_DelayManager.DelayFrame(() =>
             {
                 DialogResult dialogResult;
                 switch (result)
